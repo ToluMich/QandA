@@ -92,7 +92,6 @@ const questionService = {
 
     // Functional Google Sheets Submission
     const scriptUrl = import.meta.env.VITE_GOOGLE_SHEET_SCRIPT_URL;
-    console.log(scriptUrl)
     if (scriptUrl) {
       try {
         await fetch(scriptUrl, {
@@ -152,7 +151,7 @@ function AttendeeView() {
         <header className="px-4 mb-10 text-center md:text-left">
           <p className="text-rose-300 uppercase tracking-[0.3em] text-[10px] font-bold mb-1 ml-1">The Heart to Heart Talk</p>
           <h1 className="text-white text-4xl md:text-5xl font-serif font-light leading-tight">
-            YAYA Sunday Q & A
+            Latter House YAYA (LP61) Q&A
           </h1>
         </header>
 
@@ -213,9 +212,9 @@ function AttendeeView() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link to="/moderator" className="text-rose-100/30 hover:text-rose-100/60 text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition-colors">
+          <Link to="https://portfolio-tolu-michaels-projects.vercel.app/" className="text-rose-100/30 hover:text-rose-100/60 text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition-colors">
             <ShieldCheck size={14} />
-            Moderator Access
+            Built by Toluwalase
           </Link>
         </div>
       </motion.div>
@@ -238,11 +237,11 @@ function ModeratorView() {
   }, []);
 
   const filteredQuestions = useMemo(() => {
-    if (filter === 'pending') return questions.filter(q => !q.answered);
-    if (filter === 'answered') return questions.filter(q => q.answered);
+    let base = [...questions];
+    if (filter === 'pending') base = questions.filter(q => !q.answered);
+    if (filter === 'answered') base = questions.filter(q => q.answered);
     // Sort by timestamp ascending (oldest to newest)
     return base.sort((a, b) => a.timestamp - b.timestamp);
-    // return questions;
   }, [questions, filter]);
 
   const handleToggle = (id) => {
@@ -262,7 +261,7 @@ function ModeratorView() {
       <div className="max-w-6xl mx-auto space-y-10 relative z-20">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <p className="text-rose-300 uppercase tracking-[0.3em] text-[10px] font-bold mb-1">Q & A Moderator Portal</p>
+            <p className="text-rose-300 uppercase tracking-[0.3em] text-[10px] font-bold mb-1">YAYA(LP61) Moderator Portal</p>
             <h1 className="text-4xl md:text-5xl font-serif font-light text-white leading-tight">
               Incoming Questions
             </h1>
@@ -355,7 +354,7 @@ function ModeratorView() {
         <footer className="pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-rose-200/30 text-[10px] uppercase tracking-widest">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Syncing with Google Sheets...
+            Syncing with Real Time Data...
           </div>
           <span>Status: Connected</span>
         </footer>
