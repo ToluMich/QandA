@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Canvas } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial, OrbitControls } from '@react-three/drei';
-import { MessageSquare, ShieldCheck, RefreshCcw, User, Loader2, CheckCircle2, Heart, X } from 'lucide-react';
+import { MessageSquare, ShieldCheck, RefreshCcw, User, Loader2, CheckCircle2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -78,68 +78,13 @@ function Scene() {
   );
 }
 
-// --- NEW Success Modal Component ---
-
-function SuccessModal({ isOpen, onClose }) {
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          />
-          
-          {/* Modal Content */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.8, opacity: 0, y: 20 }}
-            className="relative w-full max-w-sm overflow-hidden rounded-[40px] border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-2xl"
-          >
-            {/* Close Button */}
-            <button 
-              onClick={onClose}
-              className="absolute right-6 top-6 text-white/40 hover:text-white transition-colors"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-purple-600 shadow-lg shadow-rose-500/20">
-                <Heart className="text-white fill-white animate-pulse" size={40} />
-              </div>
-              
-              <h3 className="mb-2 font-serif text-3xl font-light text-white">Thank You!</h3>
-              <p className="mb-8 text-rose-100/60 leading-relaxed">
-                Your question has been submitted successfully. Our moderator will review it shortly.
-              </p>
-
-              <button
-                onClick={onClose}
-                className="w-full rounded-2xl bg-white/10 border border-white/20 py-4 font-bold uppercase tracking-widest text-xs text-white transition-all hover:bg-white/20 active:scale-95"
-              >
-                Close
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 // --- Components ---
 
 function AttendeeView() {
   const [text, setText] = useState('');
   const [author, setAuthor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -154,9 +99,10 @@ function AttendeeView() {
         created_at: serverTimestamp()
       });
       
-      setShowSuccess(true);
+      setSubmitted(true);
       setText('');
       setAuthor('');
+      setTimeout(() => setSubmitted(false), 4000);
     } catch (err) {
       console.error(err);
       alert("Submission failed. Please check your connection.");
@@ -167,9 +113,6 @@ function AttendeeView() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Modal Integration */}
-      <SuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} />
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -219,10 +162,10 @@ function AttendeeView() {
               disabled={isSubmitting}
               className={cn(
                 "w-full py-5 rounded-3xl font-bold text-white tracking-widest text-xs uppercase transition-all flex items-center justify-center gap-2",
-                isSubmitting ? "bg-white/10 cursor-not-allowed" : "bg-gradient-to-r from-rose-500 to-purple-600 hover:scale-[1.01]"
+                isSubmitting ? "bg-white/10" : "bg-gradient-to-r from-rose-500 to-purple-600 hover:scale-[1.01]"
               )}
             >
-              {isSubmitting ? <RefreshCcw className="animate-spin" size={20} /> : "Submit Question"}
+              {isSubmitting ? <RefreshCcw className="animate-spin" size={20} /> : submitted ? "Sent!" : "Submit"}
             </button>
           </form>
         </div>
@@ -258,6 +201,7 @@ function ModeratorView() {
     return () => unsubscribe();
   }, []);
 
+  // NEW: Function to mark as answered
   const handleMarkAsAnswered = async (questionId) => {
     setActionLoading(questionId);
     try {
@@ -345,21 +289,38 @@ function ModeratorView() {
                       <span className="text-rose-100/60 text-xs font-semibold">{q.author}</span>
                     </div>
 
+                    {/* ANSWERED BUTTON */}
                     {q.status === 'pending' && (
                       <button
-                        onClick={() => handleMarkAsAnswered(q.id)}
-                        disabled={actionLoading === q.id}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 text-white/80 hover:text-white text-[10px] font-bold uppercase tracking-widest shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:bg-white/15 hover:border-white/30 transition-all duration-300 active:scale-[0.98]"
-                      >
-                        {actionLoading === q.id ? (
-                          <RefreshCcw className="animate-spin" size={14} />
-                        ) : (
-                          <>
-                            <CheckCircle2 size={14} />
-                            Answered
-                          </>
-                        )}
-                      </button>
+                      onClick={() => handleMarkAsAnswered(q.id)}
+                      disabled={actionLoading === q.id}
+                      className="
+                        flex items-center gap-2 px-4 py-2 rounded-xl
+                    
+                        bg-white/10
+                        backdrop-blur-xl
+                        border border-white/20
+                    
+                        text-white/80 hover:text-white
+                        text-[10px] font-bold uppercase tracking-widest
+                    
+                        shadow-[0_8px_30px_rgba(0,0,0,0.2)]
+                        hover:bg-white/15
+                        hover:border-white/30
+                    
+                        transition-all duration-300
+                        active:scale-[0.98]
+                      "
+                    >
+                      {actionLoading === q.id ? (
+                        <RefreshCcw className="animate-spin" size={14} />
+                      ) : (
+                        <>
+                          <CheckCircle2 size={14} />
+                          Answered
+                        </>
+                      )}
+                    </button>
                     )}
                   </div>
 
