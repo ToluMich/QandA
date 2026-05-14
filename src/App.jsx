@@ -122,7 +122,7 @@ function SuccessModal({ isOpen, onClose }) {
                 onClick={onClose}
                 className="w-full rounded-2xl bg-white/10 border border-white/20 py-4 font-bold uppercase tracking-widest text-xs text-white transition-all hover:bg-white/20 active:scale-95"
               >
-                Awesome
+                Close
               </button>
             </div>
           </motion.div>
